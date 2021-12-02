@@ -1,4 +1,2 @@
-# CdcProject
-
-**TODO: Add description**
-
+# Project in elixir 
+TODO

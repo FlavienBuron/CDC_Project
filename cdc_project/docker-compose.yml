@@ -1,0 +1,67 @@
+version: "3.3" # optional since v1.27.0
+
+networks:
+  project_grp7:
+    driver: bridge
+
+services:
+  ## Back_end docker
+  back_end:
+    ports:
+      - '8080:8080/tcp'
+    networks:
+      - project_grp7
+    image: borcardd/back_end:test
+    container_name: back_end.com
+    environment:
+      - front_end=front_end@front.com
+      - node1=node1@node1.com
+      - node2=node2@node2.com
+      - node3=node3@node3.com
+
+  ## Front_end docker
+  front_end:
+    ports:
+      - '3001:3000'
+    depends_on:
+      - back_end
+    networks:
+      - project_grp7
+    image: borcardd/front_end
+    container_name: front_end.com
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - back_end=back_end@back.com
+
+    ## Nodes docker
+  node1:
+    depends_on:
+      - back_end
+    networks:
+      - project_grp7
+    image: wichtf/buffer #TODO: change the source docker
+    container_name: node1.com
+    environment:
+      - back_end=back_end@back.com
+      - front_end=front_end@front.com
+  node2:
+    depends_on:
+      - back_end
+    networks:
+      - project_grp7
+    image: wichtf/buffer #TODO: change the source docker
+    container_name: node2.com
+    environment:
+      - back_end=back_end@back.com
+      - front_end=front_end@front.com
+  node3:
+    depends_on:
+      - back_end
+    networks:
+      - project_grp7
+    image: wichtf/buffer #TODO: change the source docker
+    container_name: node3.com
+    environment:
+      - back_end=back_end@back.com
+      - front_end=front_end@front.com
+
