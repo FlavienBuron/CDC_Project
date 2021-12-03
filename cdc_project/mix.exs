@@ -12,7 +12,8 @@ defmodule CdcProject.MixProject do
 
   def application do
     [
-      extra_applications: [:logger, :storage, :backend]
+      extra_applications: [:logger, Storage, Backend],
+      mod: {BackendApp, []}
     ]
   end
 
