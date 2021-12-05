@@ -1,0 +1,51 @@
+version: '3.3'
+services:
+  node1:
+    networks:
+      - project-net
+    build: ./apps/nodes/
+    hostname: node1
+    container_name: node1
+    environment:
+      - RELEASE_COOKIE=cookie
+      - RELEASE_DISTRIBUTION=sname
+      - RELEASE_NODE=node1@node1
+  node2:
+    networks:
+      - project-net
+    build: ./apps/nodes/
+    hostname: node2
+    container_name: node2
+    environment:
+      - RELEASE_COOKIE=cookie
+      - RELEASE_DISTRIBUTION=sname
+      - RELEASE_NODE=node2@node2
+  node3:
+    networks:
+      - project-net
+    build: ./apps/nodes/
+    hostname: node3
+    container_name: node3
+    environment:
+      - RELEASE_COOKIE=cookie
+      - RELEASE_DISTRIBUTION=sname
+      - RELEASE_NODE=node3@node3
+      
+  backend:
+    depends_on:
+      - node1
+      - node2
+      - node3
+    networks:
+      - project-net
+    build: ./apps/backend/
+    hostname: backend
+    container_name: backend
+    environment:
+      - RELEASE_COOKIE=cookie
+      - RELEASE_DISTRIBUTION=name
+      - RELEASE_NODE=backend@backend
+  
+networks:
+  project-net:
+    driver: bridge

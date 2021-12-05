@@ -1,6 +1,6 @@
-defmodule Storage do
+defmodule Nodes do
   import FileList
-  use Agent
+  use GenServer
 
   ### File permissions ###
   # 0 = --- => no permissions
@@ -12,45 +12,80 @@ defmodule Storage do
   # 6 = rw- => read and write
   # 7 = rwx => read, write and execute
 
-  def start(name) do
-    node = Atom.to_string(name)
-    Agent.start(fn -> "./apps/storage/lib/files/test_#{node}.json" end)
+
+
+  def start_link(opts) do
+    IO.inspect(node())
+    GenServer.start_link(__MODULE__, opts, name: node())
+  end
+
+  @impl GenServer
+  def init(_init_args) do
+    json_file = "./lib/files/test_a.json"
+    {:ok, json_file}
   end
 
   ### GET calls ###
 
-  def get(node) do
-    Agent.get(node, &get_json(&1))
+  @impl GenServer
+  def handle_info({:get, src}, state) do
+    require Logger
+    {_, node} = src
+    Logger.info("Request for all files from #{node}")
+    files = get_json(state)
+    send(src, files)
+    {:noreply, state}
   end
 
-  def get(node, filename) do
-    Agent.get(node, &get_file(&1, filename))
+  @impl GenServer
+  def handle_info({{:get, filename}, src}, state) do
+    require Logger
+    {_, node} = src
+    Logger.info("Request for specific file #{filename} from #{node}")
+    file = get_file(state, filename)
+    send(src, file)
+    {:noreply, state}
   end
 
-  def get(node, filename, key) do
-    Agent.get(node, &Map.get(get_file(&1, filename), key))
+  @impl GenServer
+  def handle_info({{:get, filename, key}, src}, state) do
+    require Logger
+    {_, node} = src
+    Logger.info("Request for specific key #{key} in file #{filename} from #{node}")
+    value = Map.get(get_file(state, filename), key)
+    send(src, value)
+    {:noreply, state}
   end
 
   ### POST calls ###
 
-  def post(node, filename, user_name) do
-    Agent.update(node, &add_file(&1, filename, user_name))
+  @impl GenServer
+  def handle_info({{:post, filename, user_name}, src}, state) do
+    require Logger
+    {_, node} = src
+    Logger.info("Post new file #{filename} by #{user_name} from #{node}")
+    add_file(state, filename, user_name)
+    {:noreply, state}
   end
 
   ### UPDATE calls ###
 
-  def update(node, filename, user_name, is_owner, permissions) do
-    Agent.update(node, &add_user(&1, filename, user_name, is_owner, permissions))
+  @impl GenServer
+  def handle_info({{:update, filename, user_name, is_owner, permissions}, src}, state) do
+    require Logger
+    {_, node} = src
+    Logger.info("Update new user #{user_name} #{is_owner} #{permissions} to file #{filename} from #{node}")
+    add_user(state, filename, user_name, is_owner, permissions)
+    {:noreply, state}
   end
 
-  def update(node, filename) do
-    Agent.update(node, &update_time(&1, filename))
-  end
-
-  ### STOP agent ###
-
-  def stop(node) do
-    Agent.stop(node)
+  @impl GenServer
+  def handle_info({{:update, filename}, src}, state) do
+    require Logger
+    {_, node} = src
+    Logger.info("Update file #{filename} from #{node}")
+    update_time(state, filename)
+    {:noreply, state}
   end
 
   #################### Private methods ####################Gen
@@ -124,5 +159,16 @@ defmodule Storage do
     new_data = Map.replace!(new_data, :size, size)
     write_json(json_file, new_data)
   end
+
+  # # def get_dist(backend, node) do
+
+  # # end
+
+  # # defp remote_supervisor()
+
+
+
+
+
 
 end

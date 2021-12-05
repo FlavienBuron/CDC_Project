@@ -14,8 +14,8 @@ defmodule Backend.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :storage],
-      mod: {BackendApp, []}
+      extra_applications: [:logger],
+      mod: {Backend.Application, []}
     ]
   end
 

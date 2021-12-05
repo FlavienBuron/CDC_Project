@@ -1,4 +1,4 @@
-defmodule BackendApp do
+defmodule Backend.Application do
   use Application
 
   @impl true
