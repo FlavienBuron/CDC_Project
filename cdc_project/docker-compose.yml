@@ -32,20 +32,40 @@ services:
       - RELEASE_NODE=node3@node3
       
   backend:
+    tty: true
     depends_on:
       - node1
       - node2
       - node3
     networks:
       - project-net
+    ports:
+      - "8080:8080"
     build: ./apps/backend/
     hostname: backend
     container_name: backend
     environment:
       - RELEASE_COOKIE=cookie
-      - RELEASE_DISTRIBUTION=name
+      - RELEASE_DISTRIBUTION=sname
       - RELEASE_NODE=backend@backend
-  
+
+  frontend:
+    tty: true
+    depends_on:
+      - backend
+    networks:
+      - project-net
+    ports:
+      - "3000:3000"
+    build: ./apps/frontend/
+    hostname: frontend
+    container_name: frontend
+    environment:
+      - RELEASE_COOKIE=cookie
+      - RELEASE_DISTRIBUTION=sname
+      - RELEASE_NODE=frontend@frontend
+
+
 networks:
   project-net:
     driver: bridge

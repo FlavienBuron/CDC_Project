@@ -16,6 +16,7 @@ defmodule Backend do
   end
 
   def get() do
+
     GenServer.call(node(), {:get, :all})
   end
 
@@ -67,7 +68,7 @@ defmodule Backend do
     else
       {_name, node} = Enum.random(nodes)
       send(node, {:get, self})
-      {:reply, :ok, {self, nodes, refs}}
+        {:reply, :ok, {self, nodes, refs}}
     end
   end
 

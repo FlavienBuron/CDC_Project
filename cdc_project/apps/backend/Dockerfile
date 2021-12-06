@@ -9,7 +9,7 @@
 # RUN mix local.hex --force \
 #  && mix local.rebar --force
 
-# RUN MIX_ENV=prod mix do deps.get, compile, release 
+# RUN MIX_ENV=prod mix do deps.get, compile, release
 
 # ENTRYPOINT ["/app/_build/prod/rel/nodes/bin/nodes"]
 # CMD ["start", "remote"]
@@ -25,7 +25,6 @@ WORKDIR /backend
 
 RUN mix do local.hex --force, local.rebar --force
 
- 
 
 # ENV APP_NAME=node@node
 ENV HOSTNAME backend
@@ -45,9 +44,7 @@ USER ${PUID}
 
 # RUN cd /nodes
 
+ENTRYPOINT ["/backend/_build/prod/rel/backend/bin/backend"]
+CMD ["start", "foreground"]
 
-
-# ENTRYPOINT ["/backend/_build/prod/rel/backend/bin/backend"]
-# CMD ["start", "remote"]
-
-ENTRYPOINT iex --sname ${HOSTNAME} --cookie cookie -S mix
+#ENTRYPOINT iex --sname ${HOSTNAME} --cookie cookie -S mix
