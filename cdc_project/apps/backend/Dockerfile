@@ -44,7 +44,7 @@ USER ${PUID}
 
 # RUN cd /nodes
 
-ENTRYPOINT ["/backend/_build/prod/rel/backend/bin/backend"]
-CMD ["start", "foreground"]
+# ENTRYPOINT ["/backend/_build/prod/rel/backend/bin/backend"]
+# CMD ["start", "foreground"]
 
-#ENTRYPOINT iex --sname ${HOSTNAME} --cookie cookie -S mix
+ENTRYPOINT iex --sname ${HOSTNAME} --cookie cookie -S mix
