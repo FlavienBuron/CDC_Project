@@ -30,8 +30,8 @@ function App() {
         await setFileForUser(user,filename)
     }
 
-    useEffect(async (e) => {
-        await getFileForUser(e)
+    useEffect((e) => {
+        getFileForUser(e)
     }, [])
 
     return (

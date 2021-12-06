@@ -2,6 +2,7 @@
 export async function getFileForUser(username) {
 
     try{
+
         const res = await fetch("http://0.0.0.0:8080/api/getFilesTest", {
             method: "GET",
             mode: "cors",
@@ -15,8 +16,8 @@ export async function getFileForUser(username) {
         return [];
     }
 
-
 }
+
 
 export async function setFileForUser(username,filename) {
 

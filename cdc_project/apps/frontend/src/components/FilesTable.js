@@ -1,12 +1,12 @@
 import React from 'react'
-
+import {displayData} from "../services/FilesServices";
 export const UsersFiles = ({files}) => {
     if (files.length === 0) return null
     //const userTable = files.users.map((user,index) => UserRow(user,index))
 
-    const FilesRow = (file,index) => {
-        return(
-            <tr key = {index} className={index%2 === 0?'odd':'even'}>
+    const FilesRow = (file, index) => {
+        return (
+            <tr key={index} className={index % 2 === 0 ? 'odd' : 'even'}>
                 <td>{index + 1}</td>
                 <td>{file.filename}</td>
                 <td>{file.created_on}</td>
@@ -17,9 +17,9 @@ export const UsersFiles = ({files}) => {
         )
 
     }
-    const filesTable = this.props.files.map((file,index) => FilesRow(file,index))
+    const filesTable = files.files.map((file, index) => FilesRow(file, index))
 
-    return(
+    return (
         <div className="container">
             <h2>Files</h2>
             <table className="table table-bordered">
