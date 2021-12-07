@@ -43,6 +43,7 @@ defmodule Backend do
   @impl true
   def init(_init_args) do
     self = {node(), node()}
+    Process.sleep(100)
     node1 = {:node1@node1, :node1@node1}
     node2 = {:node2@node2, :node2@node2}
     node3 = {:node3@node3, :node3@node3}
@@ -68,7 +69,10 @@ defmodule Backend do
     else
       {_name, node} = Enum.random(nodes)
       send(node, {:get, self})
-        {:reply, :ok, {self, nodes, refs}}
+      receive do
+        msg ->
+          {:reply, msg, {self, nodes, refs}}
+      end
     end
   end
 
@@ -79,7 +83,10 @@ defmodule Backend do
     else
       {_name, node} = Enum.random(nodes)
       send(node, {{:get, filename}, self})
-      {:reply, :ok, {self, nodes, refs}}
+      receive do
+        msg ->
+          {:reply, msg, {self, nodes, refs}}
+      end
     end
   end
 
@@ -90,7 +97,10 @@ defmodule Backend do
     else
       {_name, node} = Enum.random(nodes)
       send(node, {{:get, filename, key}, self})
-      {:reply, :ok, {self, nodes, refs}}
+      receive do
+        msg ->
+          {:reply, msg, {self, nodes, refs}}
+      end
     end
   end
 
@@ -104,7 +114,26 @@ defmodule Backend do
       Enum.each(nodes,fn {_name, node} ->
         send(node, {{:post, filename, user}, self})
       end)
-      {:reply, :ok, {self, nodes, refs}}
+      msg = listen(3)
+      {:reply, msg, {self, nodes, refs}}
+      # receive do
+      #   msg ->
+      #     {:reply, msg, {self, nodes, refs}}
+      # end
+    end
+  end
+
+  defp listen(1) do
+    receive do
+      msg ->
+        msg
+    end
+  end
+
+  defp listen(n) do
+    receive do
+      msg ->
+        listen(n-1)
     end
   end
 
@@ -118,7 +147,8 @@ defmodule Backend do
       Enum.each(nodes,fn {_name, node} ->
         send(node, {{:update, filename}, self})
       end)
-      {:reply, :ok, {self, nodes, refs}}
+      msg = listen(3)
+      {:reply, msg, {self, nodes, refs}}
     end
   end
 
@@ -129,7 +159,8 @@ defmodule Backend do
       Enum.each(nodes,fn {_name, node} ->
         send(node, {{:update, filename, user_name, is_owner, permissions}, self})
       end)
-      {:reply, :ok, {self, nodes, refs}}
+      msg = listen(3)
+      {:reply, msg, {self, nodes, refs}}
     end
   end
 

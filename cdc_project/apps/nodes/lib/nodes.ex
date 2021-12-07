@@ -32,7 +32,7 @@ defmodule Nodes do
     require Logger
     {_, node} = src
     Logger.info("Request for all files from #{node}")
-    files = get_json(state)
+    files = get_file(state)
     send(src, files)
     {:noreply, state}
   end
@@ -43,6 +43,7 @@ defmodule Nodes do
     {_, node} = src
     Logger.info("Request for specific file #{filename} from #{node}")
     file = get_file(state, filename)
+    {_,file} = Poison.encode(file)
     send(src, file)
     {:noreply, state}
   end
@@ -52,7 +53,8 @@ defmodule Nodes do
     require Logger
     {_, node} = src
     Logger.info("Request for specific key #{key} in file #{filename} from #{node}")
-    value = Map.get(get_file(state, filename), key)
+    res = Map.get(get_file(state, filename), key)
+    {_, value} = Poison.encode(%{key => res})
     send(src, value)
     {:noreply, state}
   end
@@ -64,7 +66,8 @@ defmodule Nodes do
     require Logger
     {_, node} = src
     Logger.info("Post new file #{filename} by #{user_name} from #{node}")
-    add_file(state, filename, user_name)
+    file = add_file(state, filename, user_name)
+    send(src, file)
     {:noreply, state}
   end
 
@@ -75,7 +78,8 @@ defmodule Nodes do
     require Logger
     {_, node} = src
     Logger.info("Update new user #{user_name} #{is_owner} #{permissions} to file #{filename} from #{node}")
-    add_user(state, filename, user_name, is_owner, permissions)
+    file = add_user(state, filename, user_name, is_owner, permissions)
+    send(src, file)
     {:noreply, state}
   end
 
@@ -84,11 +88,18 @@ defmodule Nodes do
     require Logger
     {_, node} = src
     Logger.info("Update file #{filename} from #{node}")
-    update_time(state, filename)
+    file = update_time(state, filename)
+    send(src, file)
     {:noreply, state}
   end
 
   #################### Private methods ####################Gen
+
+  defp get_file(file) do
+    with {:ok, body} <- File.read(file) do
+      body
+    end
+  end
 
   defp get_json(json_file) do
     with {:ok, body} <- File.read(json_file) do
@@ -99,6 +110,7 @@ defmodule Nodes do
   defp write_json(json_file, data) do
     data_json = Poison.encode!(data)
     File.write(json_file, data_json)
+    data_json
   end
 
   defp get_file(json_file, filename) do
@@ -121,7 +133,7 @@ defmodule Nodes do
     end)
     new_data = Map.replace!(data, :files, files)
     write_json(json_file, new_data)
-    json_file
+    # files
   end
 
   defp update_time(json_file, filename) do
@@ -135,7 +147,7 @@ defmodule Nodes do
     end)
     new_data = Map.replace!(data, :files, files)
     write_json(json_file, new_data)
-    json_file
+    # files
   end
 
   defp get_datetime() do
@@ -151,13 +163,14 @@ defmodule Nodes do
                 created_by: user_name,
                 created_on: date,
                 modified_on: date,
-                users: [%User{user: user_name, owner: true, permissions: 7}]
+                users: [%User{:user => user_name, :owner => true, :permissions => 7}]
                 }
     files = data.files ++ [new_file]
     size = length(files)
     new_data = Map.replace!(data, :files, files)
     new_data = Map.replace!(new_data, :size, size)
     write_json(json_file, new_data)
+    # files
   end
 
   # # def get_dist(backend, node) do
