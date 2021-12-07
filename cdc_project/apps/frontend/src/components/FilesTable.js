@@ -1,8 +1,12 @@
 import React from 'react'
-import {displayData} from "../services/FilesServices";
+import {updateFile} from "../services/FilesServices";
 export const UsersFiles = ({files}) => {
     if (files.length === 0) return null
-    //const userTable = files.users.map((user,index) => UserRow(user,index))
+
+    function sayDelete() {
+        alert('This function is not implemented yet');
+    }
+
 
     const FilesRow = (file, index) => {
         return (
@@ -12,6 +16,7 @@ export const UsersFiles = ({files}) => {
                 <td>{file.created_on}</td>
                 <td>{file.modified_on}</td>
                 <td>{file.created_by}</td>
+                <td><button onClick={updateFile(file.filename)} >Update file</button><button onClick={sayDelete}>Delete file</button></td>
 
             </tr>
         )
@@ -28,10 +33,9 @@ export const UsersFiles = ({files}) => {
                     <th>Files ID</th>
                     <th>Filename</th>
                     <th>Created on</th>
-                    <th>modified on</th>
-                    <th>User</th>
-                    <th>permissions</th>
-                    <th>owner</th>
+                    <th>Modified on</th>
+                    <th>Owner</th>
+                    <th>Edit</th>
                 </tr>
                 </thead>
                 <tbody>

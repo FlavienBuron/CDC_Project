@@ -4,7 +4,7 @@ import './App.css';
 import {Header} from './components/Header'
 import {UsersFiles} from './components/FilesTable'
 import InputPart from './components/InputPart'
-import {getFileForUser,setFileForUser} from './services/FilesServices'
+import {getAllFiles, setFileForUser} from './services/FilesServices'
 
 function App() {
     const [user, setUser] = useState("");
@@ -20,18 +20,17 @@ function App() {
     };
 
     const getFiles = async (e) => {
-        await getFileForUser(user)
+        await getAllFiles(user)
             .then(files => {
                 setFiles(files);
             });
     }
-    const setFilesBis = async (e) => {
-        console.log("filename ",filename)
+    const postFile = async (e) => {
         await setFileForUser(user,filename)
     }
 
     useEffect((e) => {
-        getFileForUser(e)
+        getAllFiles(e)
     }, [])
 
     return (
@@ -41,7 +40,7 @@ function App() {
             <InputPart
                 onChange={handleUsernameChange}
                 apiGetFiles={getFiles}
-                apiSetFiles={setFilesBis}
+                apiSetFiles={postFile}
             />
 
 

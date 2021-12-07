@@ -16,7 +16,6 @@ defmodule Backend do
   end
 
   def get() do
-
     GenServer.call(node(), {:get, :all})
   end
 

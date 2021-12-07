@@ -11,26 +11,69 @@ defmodule Backend.Router do
   plug(CORSPlug, origin: ["http://0.0.0.0:3000"])
   plug(:dispatch)
 
-
+  ## CHECK HEALTH ##
 
   get "/health" do
     send_resp(conn, 200, "ok")
   end
 
-  get "/api/getFilesTest" do
-    testData = ~s({"size":3,"files":[{"users":[{"user":"alice","permissions":7,"owner":true},{"user":"bob","permissions":1,"owner":false}],"modified_on":"2021-11-30 15:53:24","filename":"test.txt","created_on":"2021-11-28 12:00:00","created_by":"alice"},{"users":[{"user":"bob","permissions":7,"owner":true},{"user":"alice","permissions":4,"owner":false}],"modified_on":"2021-11-30 15:53:24","filename":"How to train your Computer.pdf","created_on":"2021-11-30 15:53:24","created_by":"bob"},{"users":[{"user":"charles","permissions":7,"owner":true}],"modified_on":"2021-12-02 10:52:31","filename":"rickroll.gif","created_on":"2021-12-02 10:52:31","created_by":"charles"}]})
+  ## MANAGE NODES ##
+
+  get "/api/stopNodes" do
+    queryResult = Backend.stop_nodes()
     conn
     |> put_resp_content_type("application/json")
-    #|> send_resp(200, Jason.encode!(%{"age" => 44, "name" => "Marc Irwin", "nationality" => "Australian"}))
-    |> send_resp(200, testData)
+
+    |> send_resp(200, Poison.encode!(queryResult))
   end
 
+  ## GET / UPDATE SPECIFIC FILE ##
 
-  get "/api/getFiles" do
+  get "/api/files/:filename" do
+    queryResult = Backend.get(filename)
     conn
     |> put_resp_content_type("application/json")
-    |> send_resp(200, Jason.encode!(Backend.get()))
+    |> send_resp(200, Poison.encode!(queryResult))
+  end
+
+  patch "/api/files/:filename" do
+    queryResult = Backend.update(filename)
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, Poison.encode!(queryResult))
+  end
+
+  ## GET ALL FILES ##
+
+  get "/api/files" do
+    queryResult = Backend.get()
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, Poison.encode!(queryResult))
     end
+
+  ## POST A NEW FILE ##
+
+  post "/api/files" do
+    username =
+      case conn.body_params do
+        %{"username" => a_name } -> a_name
+        _ -> ""
+      end
+
+    filename =
+      case conn.body_params do
+        %{"filename" => b_name } -> b_name
+        _ -> ""
+      end
+
+    queryResult = Backend.post(filename,username)
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, Poison.encode!(queryResult))
+  end
+
+  ## DEFAULT ENDPOINT ##
 
   match _ do
     send_resp(conn, 404, "not found")
