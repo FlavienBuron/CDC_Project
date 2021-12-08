@@ -1,5 +1,6 @@
 defmodule Nodes do
   import FileList
+  # import User
   use GenServer
 
   ### File permissions ###
@@ -38,7 +39,28 @@ defmodule Nodes do
   end
 
   @impl GenServer
-  def handle_info({{:get, filename}, src}, state) do
+  def handle_info({{:get, :permission, filename, username, permissions}, src}, state) do
+    require Logger
+    {_, node} = src
+    Logger.info("Request if #{username} has permission on #{filename}")
+    has_perm = has_permission(state, filename, username, permissions)
+    send(src, has_perm)
+    {:noreply, state}
+  end
+
+  @impl GenServer
+  def handle_info({{:get, :user, name}, src}, state) do
+    require Logger
+    {_, node} = src
+    Logger.info("Request for files of #{name}")
+    files = get_user_files(state, name)
+    file = Poison.encode!(files)
+    send(src, file)
+    {:noreply, state}
+  end
+
+  @impl GenServer
+  def handle_info({{:get, :file, filename}, src}, state) do
     require Logger
     {_, node} = src
     Logger.info("Request for specific file #{filename} from #{node}")
@@ -93,6 +115,15 @@ defmodule Nodes do
     {:noreply, state}
   end
 
+  @impl GenServer
+  def handle_info({:stop}, state) do
+    require Logger
+    # {_, node} = src
+    Logger.info("Request for shutdown")
+    GenServer.stop(node())
+    {:noreply, state}
+  end
+
   #################### Private methods ####################Gen
 
   defp get_file(file) do
@@ -101,7 +132,35 @@ defmodule Nodes do
     end
   end
 
-  defp get_json(json_file) do
+  defp get_file(json_file, filename) do
+    data = get_json(json_file)
+    file = Enum.find(data.files, fn file ->
+      file.filename == filename
+    end)
+    file
+  end
+
+  def get_user_files(json_file, user_name) do
+    data = get_json(json_file)
+    files = Enum.filter(data.files, fn file ->
+      userlist = file.users
+      res = Enum.map(userlist, fn user ->
+        username = Map.get(user, "user")
+        cond do
+        username == user_name ->
+          true
+        true -> false
+        end
+      end)
+      if Enum.any?(res) do
+        file
+      end
+    end)
+    %FileList{files: files, size: length(files)}
+    # user_files
+  end
+
+  def get_json(json_file) do
     with {:ok, body} <- File.read(json_file) do
       Poison.decode!(body, as: %FileList{})
     end
@@ -111,14 +170,6 @@ defmodule Nodes do
     data_json = Poison.encode!(data)
     File.write(json_file, data_json)
     data_json
-  end
-
-  defp get_file(json_file, filename) do
-    data = get_json(json_file)
-    file = Enum.find(data.files, fn file ->
-      file.filename == filename
-    end)
-    file
   end
 
   defp add_user(json_file, filename, user_name, is_owner, permissions) do
@@ -173,6 +224,30 @@ defmodule Nodes do
     # files
   end
 
+  def has_permission(json_file, filename, username, permissions) do
+    data = get_user_files(json_file, username)
+    files = Enum.filter(data.files, fn file ->
+      file.filename == filename
+    end)
+    perm = Enum.any?(files, fn file ->
+      userlist = file.users
+      cond do
+        file.created_by == username ->
+          true
+        true ->
+          Enum.any?(Enum.map(userlist, fn user ->
+            file_user = Map.get(user, "user")
+            cond do
+              file_user == username ->
+                Enum.member?(permissions, Map.get(user, "permissions"))
+              true -> false
+            end
+          end))
+      end
+    end)
+    perm
+
+  end
   # # def get_dist(backend, node) do
 
   # # end
