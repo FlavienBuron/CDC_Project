@@ -30,14 +30,14 @@ defmodule Backend do
   Retrieve the files for which the specified user has access to.
   Only files where the user is in the user list
   """
-  def get(user) do
+  def get_files(user) do
     GenServer.call(node(), {:get, :user, user})
   end
 
   @doc """
   Retrieve the specified file regardless of the user.
   """
-  def get(filename) do
+  def get_files(filename) do
     GenServer.call(node(), {:get, :file, filename})
   end
 
@@ -59,8 +59,8 @@ defmodule Backend do
   Add a user to the file with ownership status and permissions
   Only users with ownership can add new user
   """
-  def update(filename, user_name, is_owner, permissions) do
-    GenServer.call(node(), {:update, filename, user_name, is_owner, permissions})
+  def update(filename, by_username, new_username, is_owner, permissions) do
+    GenServer.call(node(), {:update, filename, by_username, new_username, is_owner, permissions})
   end
 
   @doc """
@@ -69,10 +69,6 @@ defmodule Backend do
   """
   def update(filename, username) do
     GenServer.call(node(), {:update, filename, username})
-  end
-
-  defp check_permissions(filename, username, permissions) do
-    GenServer.call(node(), {:get, :permission, filename, username, permissions})
   end
 
   @impl true
@@ -189,12 +185,12 @@ defmodule Backend do
   ### UPDATE calls ###
 
   @impl true
-  def handle_call({:update, filename, username}, _from, {self, nodes, refs}) do
+  def handle_call({:update, filename, by_username}, _from, {self, nodes, refs}) do
     if Enum.empty?(nodes) do
       {:reply, "No node available", {self, nodes, refs}}
     else
-      perm = has_permission(nodes, filename, username, [2, 3, 6, 7])
-      if perm do
+      perm = has_permission(nodes, self, filename, by_username, [2, 3, 6, 7])
+      if perm == true do
         IO.inspect(perm)
         Enum.each(nodes,fn {_name, node} ->
           send(node, {{:update, filename}, self})
@@ -203,33 +199,35 @@ defmodule Backend do
         {:reply, msg, {self, nodes, refs}}
       else
         IO.inspect(perm)
-        msg = "{\"ok\"}"
+        msg = "{\"Error\":\"Permission Denied\"}"
         {:reply, msg, {self, nodes, refs}}
       end
     end
   end
 
-  def has_permission(nodes, filename, username, permissions) do
-    {_name, node} = Enum.random(nodes)
-    send(node, {{:get, :permission, filename, username, permissions}, self})
-    receive do
-      msg ->
-        msg
-    end
-  end
-
-  def handle_call({:update, filename, user_name, is_owner, permissions}, _from, {self, nodes, refs}) do
+  def handle_call({:update, filename, by_username, new_username, is_owner, permissions}, _from, {self, nodes, refs}) do
     if Enum.empty?(nodes) do
       {:reply, "No node available", {self, nodes, refs}}
     else
-      if is_owner do
-        permissions = 7
+      perm = has_permission(nodes, self, filename, by_username, [7])
+      if perm == true do
+        Enum.each(nodes,fn {_name, node} ->
+          if is_owner == true do
+            send(node, {{:update, filename, new_username, is_owner, 7}, self})
+          else
+            if permissions == 7 do
+            send(node, {{:update, filename, new_username, true, permissions}, self})
+            else
+            send(node, {{:update, filename, new_username, is_owner, permissions}, self})
+            end
+          end
+        end)
+        msg = listen(3)
+        {:reply, msg, {self, nodes, refs}}
+      else
+        msg = "{\"Error\":\"Permission Denied\"}"
+        {:reply, msg, {self, nodes, refs}}
       end
-      Enum.each(nodes,fn {_name, node} ->
-        send(node, {{:update, filename, user_name, is_owner, permissions}, self})
-      end)
-      msg = listen(3)
-      {:reply, msg, {self, nodes, refs}}
     end
   end
 
@@ -263,6 +261,16 @@ defmodule Backend do
   end
 
   ### Helper functions
+
+  def has_permission(nodes, self, filename, username, permissions) do
+    {_name, node} = Enum.random(nodes)
+    send(node, {{:get, :permission, filename, username, permissions}, self})
+    receive do
+      msg ->
+        msg
+    end
+  end
+
   defp listen(1) do
     receive do
       msg ->
@@ -272,7 +280,7 @@ defmodule Backend do
 
   defp listen(n) do
     receive do
-      msg ->
+      _msg ->
         listen(n-1)
     end
   end

@@ -13,6 +13,9 @@ defmodule Nodes do
   # 6 = rw- => read and write
   # 7 = rwx => read, write and execute
 
+  # To simplify, and because "execute" doesn't really make sense with simple files we can attibute any permissions level
+  # but only the read and write status are important. 7 is used for ownership
+
 
 
   def start_link(opts) do
@@ -22,7 +25,7 @@ defmodule Nodes do
 
   @impl GenServer
   def init(_init_args) do
-    json_file = "./lib/files/test_a.json"
+    json_file = "./lib/files/file_storage.json"
     {:ok, json_file}
   end
 
@@ -41,7 +44,7 @@ defmodule Nodes do
   @impl GenServer
   def handle_info({{:get, :permission, filename, username, permissions}, src}, state) do
     require Logger
-    {_, node} = src
+    # {_, node} = src
     Logger.info("Request if #{username} has permission on #{filename}")
     has_perm = has_permission(state, filename, username, permissions)
     send(src, has_perm)
@@ -51,7 +54,7 @@ defmodule Nodes do
   @impl GenServer
   def handle_info({{:get, :user, name}, src}, state) do
     require Logger
-    {_, node} = src
+    # {_, node} = src
     Logger.info("Request for files of #{name}")
     files = get_user_files(state, name)
     file = Poison.encode!(files)
@@ -198,7 +201,6 @@ defmodule Nodes do
     end)
     new_data = Map.replace!(data, :files, files)
     write_json(json_file, new_data)
-    # files
   end
 
   defp get_datetime() do
