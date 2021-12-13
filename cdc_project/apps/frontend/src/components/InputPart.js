@@ -28,7 +28,7 @@ export const InputPart = ({onChange, apiGetFiles, apiSetFiles}) => {
                         </div>
                         <button type="button" onClick={(e) => apiGetFiles()} className="btn btn-danger">Get all files</button>
                         <button type="button" onClick={(e) => apiSetFiles()} className="btn btn-danger">Post new file</button>
-                        <button type="button" onClick={(e) => stopNodes()} className="btn btn-danger">stop nodes</button>
+                        {/*<button type="button" onClick={(e) => stopNodes()} className="btn btn-danger">stop nodes</button>*/}
                     </form>
                 </div>
             </div>

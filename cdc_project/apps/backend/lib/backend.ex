@@ -2,7 +2,7 @@ defmodule Backend do
   use GenServer
 
   @moduledoc """
-  This is the module for the backend logic. It present a 'client' API, as set of call that are then appropriatelly directed to the nodes
+  This is the module for the backend logic. It present a 'client' API, as set of call that are then appropriately directed to the nodes
   """
 
 
@@ -74,6 +74,7 @@ defmodule Backend do
   @impl true
   def init(_init_args) do
     self = {node(), node()}
+    Process.sleep(100)
     node1 = {:node1@node1, :node1@node1}
     node2 = {:node2@node2, :node2@node2}
     node3 = {:node3@node3, :node3@node3}
@@ -182,6 +183,20 @@ defmodule Backend do
     end
   end
 
+  defp listen(1) do
+    receive do
+      msg ->
+        msg
+    end
+  end
+
+  defp listen(n) do
+    receive do
+      msg ->
+        listen(n-1)
+    end
+  end
+
   ### UPDATE calls ###
 
   @impl true
@@ -230,6 +245,16 @@ defmodule Backend do
       end
     end
   end
+
+  # @impl true
+  # def handle_call({:update, filename}, _from, {nodes, refs}) do
+  #   if Enum.empty?(nodes) do
+  #     {:reply, "No node available", {nodes, refs}}
+  #   else
+  #     Enum.each(nodes,fn {_name, node} -> Storage.update(node, filename) end)
+  #     {:reply, :ok, {nodes, refs}}
+  #   end
+  # end
 
   @impl true
   def handle_info({:DOWN, ref, :process, _pid, _reason}, {self, nodes, refs}) do

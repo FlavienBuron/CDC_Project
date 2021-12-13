@@ -4,6 +4,9 @@ defmodule Backend.Router do
   require Logger
   import FileList
 
+  @moduledoc """
+  This is the module for the backend rest server. It present a 'client' endpoints that can be called via http
+  """
 
   plug(Plug.Logger, log: :debug)
   plug(:match)
@@ -23,24 +26,38 @@ defmodule Backend.Router do
     queryResult = Backend.stop_nodes()
     conn
     |> put_resp_content_type("application/json")
-
     |> send_resp(200, Poison.encode!(queryResult))
   end
 
   ## GET / UPDATE SPECIFIC FILE ##
 
   get "/api/files/:filename" do
-    queryResult = Backend.get(filename)
+    queryResult = Backend.get_files(filename)
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, Poison.encode!(queryResult))
   end
 
-  patch "/api/files/:filename" do
-    queryResult = Backend.update(filename)
+  get "/api/files/users/:user" do
+    queryResult = Backend.get_files(user)
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, Poison.encode!(queryResult))
+  end
+
+  ## update file without permission
+  patch "/api/files/:filename" do
+      queryResult = Backend.update(filename)
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(200, queryResult)
+    end
+
+  patch "/api/files/:filename/users/:user" do
+      queryResult = Backend.update(filename, user)
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(200, queryResult)
   end
 
   ## GET ALL FILES ##
@@ -51,6 +68,13 @@ defmodule Backend.Router do
     |> put_resp_content_type("application/json")
     |> send_resp(200, Poison.encode!(queryResult))
     end
+
+  get "/api/files/users" do
+    queryResult = Backend.get()
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, Poison.encode!(queryResult))
+  end
 
   ## POST A NEW FILE ##
 
@@ -71,6 +95,43 @@ defmodule Backend.Router do
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, Poison.encode!(queryResult))
+  end
+
+  patch "/api/files" do
+    by_username =
+      case conn.body_params do
+        %{"username" => a_name } -> a_name
+        _ -> ""
+      end
+
+    filename =
+      case conn.body_params do
+        %{"filename" => b_name } -> b_name
+        _ -> ""
+      end
+
+    new_username =
+      case conn.body_params do
+        %{"filename" => b_name } -> b_name
+        _ -> ""
+      end
+
+    is_owner =
+      case conn.body_params do
+        %{"filename" => b_name } -> b_name
+        _ -> ""
+      end
+
+    permissions =
+      case conn.body_params do
+        %{"filename" => b_name } -> b_name
+        _ -> ""
+      end
+
+    queryResult = Backend.update(filename, by_username, new_username, is_owner, permissions)
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, Poison.encode!("file posted"))
   end
 
   ## DEFAULT ENDPOINT ##
