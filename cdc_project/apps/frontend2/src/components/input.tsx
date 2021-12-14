@@ -14,9 +14,10 @@ export default class InputForm extends React.Component <{}, { [key: string]: any
     constructor(props: any) {
         super(props);
         this.state = {
-            result: [],
+            result: {},
             username: '',
-            filename: ''
+            filename: '',
+            showComponent: false,
         };
 
         this.handleChangeUsername = this.handleChangeUsername.bind(this);
@@ -40,33 +41,31 @@ export default class InputForm extends React.Component <{}, { [key: string]: any
 
     getAllButtonState = () => {
         getAllFiles().then(result => {
-            this.setState({result});
+            this.setState({result: result,showComponent: true})
         });
-        this.setState({blabla: <FilesTable inputfiles={this.state.result}/>})
     };
 
     getFileButtonState = () => {
         getFileByName(this.state.filename).then(result => {
-            this.setState({result});
+            this.setState({result: result,showComponent: true});
         });
-        this.setState({blabla: <FilesTable inputfiles={this.state.result}/>})
     };
 
     getFileUserButtonState = () => {
         getFileForUser(this.state.username).then(result => {
-            this.setState({result});
+            this.setState({result: result,showComponent: true});
         });
     };
 
     postFileUserButtonState = () => {
         setFileForUser(this.state.username, this.state.filename).then(result => {
-            this.setState({result});
+            this.setState({result: result,showComponent: true});
         });
     };
 
     updateFilePermFunction = (filename: any, username: any) => {
         updateFilePerm(filename, username).then(result => {
-            this.setState({result});
+            this.setState({result: result,showComponent: true});
         });
     }
 
@@ -132,21 +131,11 @@ export default class InputForm extends React.Component <{}, { [key: string]: any
                     </Row>
 
                 </Form>
-                <Table striped bordered hover>
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>File Name</th>
-                        <th>Owner</th>
-                        <th>Created on</th>
-                        <th>Modified on</th>
-                        <th>Edit</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {this.renderRows()}
-                    </tbody>
-                </Table>
+
+                {this.state.showComponent ?
+                    <FilesTable inputfiles={this.state.result} username={this.state.username}/> :
+                    null}
+
 
             </Container>
 
