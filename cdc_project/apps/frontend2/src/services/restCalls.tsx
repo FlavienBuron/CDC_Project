@@ -48,22 +48,7 @@ export async function getAllFiles() {
     }
 }
 
-export async function updateFile(filename: any) {
-    try{
-        const res = await fetch(`http://0.0.0.0:8080/api/files/${filename}`, {
-            method: "PATCH",
-            mode: "cors",
-            cache: "no-cache",
-            headers: {"Content-Type": "application/json"}
-        });
-        const response = await res.json();
-        console.log(response);
-        return response;
-    }catch(error) {
-        return [];
-    }
-}
-export async function updateFilePerm(filename: any, username: any) {
+export async function updateFilePerm(filename: any, username: string) {
     try{
         const res = await fetch(`http://0.0.0.0:8080/api/files/${filename}/users/${username}`, {
             method: "PATCH",

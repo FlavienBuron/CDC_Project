@@ -45,14 +45,7 @@ defmodule Backend.Router do
     |> send_resp(200, Poison.encode!(queryResult))
   end
 
-  ## update file without permission
-  patch "/api/files/:filename" do
-      queryResult = Backend.update(filename)
-      conn
-      |> put_resp_content_type("application/json")
-      |> send_resp(200, queryResult)
-    end
-
+  ## update file
   patch "/api/files/:filename/users/:user" do
       queryResult = Backend.update(filename, user)
       conn
