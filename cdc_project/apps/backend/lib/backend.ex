@@ -37,7 +37,7 @@ defmodule Backend do
   @doc """
   Retrieve the specified file regardless of the user.
   """
-  def get_files(filename) do
+  def get_file(filename) do
     GenServer.call(node(), {:get, :file, filename})
   end
 

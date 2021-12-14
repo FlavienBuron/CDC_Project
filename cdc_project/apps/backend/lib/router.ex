@@ -32,7 +32,7 @@ defmodule Backend.Router do
   ## GET / UPDATE SPECIFIC FILE ##
 
   get "/api/files/:filename" do
-    queryResult = Backend.get_files(filename)
+    queryResult = Backend.get_file(filename)
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, Poison.encode!(queryResult))

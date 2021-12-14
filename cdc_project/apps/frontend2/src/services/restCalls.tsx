@@ -79,7 +79,7 @@ export async function getFileByName(filename: any) {
         });
         const response = await res.json();
         console.log(response);
-        return JSON.parse(response).files;
+        return [JSON.parse(response)];
     }catch(error) {
         return [];
     }
