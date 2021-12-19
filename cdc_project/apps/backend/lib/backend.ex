@@ -183,20 +183,6 @@ defmodule Backend do
     end
   end
 
-  defp listen(1) do
-    receive do
-      msg ->
-        msg
-    end
-  end
-
-  defp listen(n) do
-    receive do
-      msg ->
-        listen(n-1)
-    end
-  end
-
   ### UPDATE calls ###
 
   @impl true
@@ -287,6 +273,9 @@ defmodule Backend do
 
   ### Helper functions
 
+  @doc """
+  Request the user permissions for the specified file and evaluate if it correspond to the expected permissons for the action
+  """
   def has_permission(nodes, self, filename, username, permissions) do
     {_name, node} = Enum.random(nodes)
     send(node, {{:get, :permission, filename, username, permissions}, self})

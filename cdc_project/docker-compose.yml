@@ -57,7 +57,7 @@ services:
       - project-net
     ports:
       - "3000:3000"
-    build: ./apps/frontend2/
+    build: ./apps/frontend/
     hostname: frontend
     container_name: frontend
     environment:
