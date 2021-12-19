@@ -63,5 +63,5 @@ Where XXXXX stands for the following possible functions:
 * get_files(user): return the JSON string of the files for which the user has access
 * get_file(filename): return the JSON string of the specified file
 * post(filename, user): create a new file, created by the user. Return the new list of files
-* update(filename, by_username, new_username, is_owner, permissions): add a new user (new_username) to the file (filename), if user requesting the update (by_username) has correct permission (==owner). The new user will have the ownership status and permissions defined in is_owner (boolean) and permissions (integer, 1 to 7). If ownership is true the permissions are set to 7 regardless of the specified number, and vis-versa.
+* update(filename, by_username, new_username, is_owner, permissions): add a new user (new_username) to the file (filename), if user requesting the update (by_username) has correct permission (==owner). The new user will have the ownership status and permissions defined in is_owner (boolean) and permissions (integer, 1 to 7). If ownership is true the permissions are set to 7 regardless of the specified number, and vice versa.
 * update(filename, username): update the timestamp of the specified file if the user requesting the action has the correct permissions
