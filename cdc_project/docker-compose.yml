@@ -3,7 +3,8 @@ services:
   node1:
     networks:
       - project-net
-    build: ./apps/nodes/
+    # build: ./apps/nodes/
+    image: buronf/nodes
     hostname: node1
     container_name: node1
     environment:
@@ -13,7 +14,8 @@ services:
   node2:
     networks:
       - project-net
-    build: ./apps/nodes/
+    # build: ./apps/nodes/
+    image: buronf/nodes
     hostname: node2
     container_name: node2
     environment:
@@ -23,7 +25,8 @@ services:
   node3:
     networks:
       - project-net
-    build: ./apps/nodes/
+    # build: ./apps/nodes/
+    image: buronf/nodes
     hostname: node3
     container_name: node3
     environment:
@@ -41,7 +44,8 @@ services:
       - project-net
     ports:
       - "8080:8080"
-    build: ./apps/backend/
+    # build: ./apps/backend/
+    image: buronf/backend
     hostname: backend
     container_name: backend
     environment:
@@ -57,7 +61,8 @@ services:
       - project-net
     ports:
       - "3000:3000"
-    build: ./apps/frontend/
+    # build: ./apps/frontend/
+    image: buronf/frontend
     hostname: frontend
     container_name: frontend
     environment:
